@@ -39,6 +39,14 @@
           >
             View on OnlyFans ↗
           </a>
+          <a
+            :href="backupUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm hover:bg-indigo-500/20 transition-colors"
+          >
+            Backup ↗
+          </a>
           <button
             @click="togglePin(creator.username)"
             :class="[
@@ -156,6 +164,7 @@ const route = useRoute()
 const username = computed(() => route.params.username)
 const showModal = ref(false)
 const pinned = computed(() => isPinned(username.value))
+const backupUrl = computed(() => `http://${window.location.hostname}:6906/${username.value}`)
 
 function onKeydown(e) { if (e.key === 'Escape') showModal.value = false }
 onMounted(() => window.addEventListener('keydown', onKeydown))
