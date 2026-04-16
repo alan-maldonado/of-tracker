@@ -6,9 +6,11 @@ services:
     restart: unless-stopped
     environment:
       - DATA_DIR=/app/data
+      - DB_DIR=/app/db
       - PORT=3001
     volumes:
-      - ./data:/app/data
+      - ${DATA_DIR:-./data}:/app/data
+      - ./server/db:/app/db
 
   app:
     build:

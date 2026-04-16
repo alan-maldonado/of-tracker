@@ -10,6 +10,7 @@ node_modules/
 *.db-shm
 *.db-wal
 data/
+server/db/
 
 # Backup
 backup/
