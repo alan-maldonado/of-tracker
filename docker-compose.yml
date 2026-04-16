@@ -3,6 +3,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+    user: "${UID:-999}:${GID:-1000}"
     restart: unless-stopped
     environment:
       - DATA_DIR=/app/data
