@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# Databases
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# Backup
+backup/
+
+# OS
+.DS_Store
+
+# Build output
+dist/
+
+# Logs
+*.log

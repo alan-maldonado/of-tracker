@@ -1,0 +1,21 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - DATA_DIR=/app/data
+      - PORT=3001
+    volumes:
+      - ./data:/app/data
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.app
+    restart: unless-stopped
+    ports:
+      - "6905:80"
+    depends_on:
+      - server
