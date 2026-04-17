@@ -164,7 +164,7 @@ const route = useRoute()
 const username = computed(() => route.params.username)
 const showModal = ref(false)
 const pinned = computed(() => isPinned(username.value))
-const backupUrl = computed(() => `http://${window.location.hostname}:6906/${username.value}`)
+const backupUrl = computed(() => `http://${window.location.hostname}:6906/#/${username.value}`)
 
 function onKeydown(e) { if (e.key === 'Escape') showModal.value = false }
 onMounted(() => window.addEventListener('keydown', onKeydown))
