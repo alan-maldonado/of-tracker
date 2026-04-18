@@ -244,9 +244,10 @@ const stats = computed(() => {
 const balance = computed(() => {
   let topups = 0, spent = 0
   for (const tx of transactions.value) {
+    if (tx.source === 'card') continue
     const type = getTxType(tx)
     if (type === 'topup') topups += tx.amount || 0
-    else spent += tx.amount || 0
+    else spent += (tx.amount || 0) + (tx.vatAmount || 0)
   }
   return topups - spent
 })
