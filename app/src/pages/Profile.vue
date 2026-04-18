@@ -40,6 +40,7 @@
             View on OnlyFans ↗
           </a>
           <a
+            v-if="backupProfiles.has(creator.username)"
             :href="backupUrl"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm hover:bg-indigo-500/20 transition-colors"
           >
@@ -154,7 +155,7 @@ import { useRoute, RouterLink } from 'vue-router'
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip } from 'chart.js'
 import TransactionRow from '../components/TransactionRow.vue'
-import { transactions, getTxType, formatCurrency, togglePin, isPinned, pinnedUsernames } from '../composables/useTransactions'
+import { transactions, getTxType, formatCurrency, togglePin, isPinned, pinnedUsernames, backupProfiles } from '../composables/useTransactions'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip)
 

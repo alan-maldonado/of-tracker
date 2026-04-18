@@ -75,6 +75,19 @@ export function isPinned(username) {
 
 loadPins()
 
+// ── Backup profiles ───────────────────────────────────────────────────────────
+
+export const backupProfiles = ref(new Set())
+
+export async function loadBackupProfiles() {
+  try {
+    const res = await fetch('/api/backup-profiles')
+    if (res.ok) backupProfiles.value = new Set(await res.json())
+  } catch {}
+}
+
+loadBackupProfiles()
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 export function getTxType(tx) {

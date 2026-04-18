@@ -22,6 +22,11 @@
                     : 'text-gray-400 hover:text-white hover:bg-gray-800'
                 ]"
               >{{ link.label }}</RouterLink>
+
+              <a
+                href="http://zima.local:6906"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-gray-800"
+              >Backup</a>
             </nav>
           </div>
 

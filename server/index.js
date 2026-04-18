@@ -10,6 +10,19 @@ app.use(express.json({ limit: '50mb' }))
 app.use('/api/transactions', require('./routes/transactions'))
 app.use('/api/pins', require('./routes/pins'))
 
+const BACKUP_BASE_URL = process.env.BACKUP_BASE_URL || 'http://zima.local:6906'
+
+app.get('/api/backup-profiles', async (req, res) => {
+  try {
+    const r = await fetch(`${BACKUP_BASE_URL}/api/profiles`)
+    if (!r.ok) return res.status(502).json({ error: `Backup returned ${r.status}` })
+    const profiles = await r.json()
+    res.json(profiles.map(p => p.name))
+  } catch (e) {
+    res.status(502).json({ error: e.message })
+  }
+})
+
 app.get('/api/health', (_, res) => res.json({ ok: true }))
 
 app.listen(PORT, () => {

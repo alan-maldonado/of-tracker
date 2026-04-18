@@ -9,6 +9,9 @@ services:
       - DATA_DIR=/app/data
       - DB_DIR=/app/db
       - PORT=3001
+      - BACKUP_BASE_URL=${BACKUP_BASE_URL:-http://host.docker.internal:6906}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ${DATA_DIR:-./data}:/app/data
       - ./server/db:/app/db
