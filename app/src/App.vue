@@ -86,8 +86,6 @@
           <!-- Backup link -->
           <a
             href="http://zima.local:6906"
-            target="_blank"
-            rel="noopener noreferrer"
             title="OF Backup"
             class="p-1.5 rounded-lg text-gray-500 hover:text-white transition-colors shrink-0"
           >
