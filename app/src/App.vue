@@ -23,10 +23,6 @@
                 ]"
               >{{ link.label }}</RouterLink>
 
-              <a
-                href="http://zima.local:6906"
-                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-gray-800"
-              >Backup</a>
             </nav>
           </div>
 
@@ -86,6 +82,19 @@
             </Transition>
           </div>
           <ImportExport />
+
+          <!-- Backup link -->
+          <a
+            href="http://zima.local:6906"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="OF Backup"
+            class="p-1.5 rounded-lg text-gray-500 hover:text-white transition-colors shrink-0"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+            </svg>
+          </a>
 
           <!-- Sync backup profiles -->
           <button
