@@ -86,6 +86,23 @@
             </Transition>
           </div>
           <ImportExport />
+
+          <!-- Sync backup profiles -->
+          <button
+            @click="runSync"
+            :disabled="syncing"
+            :title="syncLabel || 'Sync backup profiles'"
+            class="p-1.5 rounded-lg transition-colors shrink-0"
+            :class="syncing ? 'text-gray-600 cursor-not-allowed' : syncError ? 'text-red-400 hover:text-red-300' : syncDone ? 'text-green-400 hover:text-green-300' : 'text-gray-500 hover:text-white'"
+          >
+            <svg v-if="syncing" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </button>
           </div>
 
         </div>
@@ -114,7 +131,7 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
-import { formatCurrency, useTransactions, isLoading, loadError } from './composables/useTransactions'
+import { formatCurrency, useTransactions, isLoading, loadError, loadBackupProfiles } from './composables/useTransactions'
 import ImportExport from './components/ImportExport.vue'
 
 const links = [
@@ -125,6 +142,31 @@ const links = [
 
 const router = useRouter()
 const { allCreators } = useTransactions()
+
+const syncing   = ref(false)
+const syncDone  = ref(false)
+const syncError = ref(false)
+const syncLabel = ref('')
+
+async function runSync() {
+  if (syncing.value) return
+  syncing.value   = true
+  syncDone.value  = false
+  syncError.value = false
+  syncLabel.value = ''
+  try {
+    await loadBackupProfiles()
+    syncDone.value  = true
+    syncLabel.value = 'Backup profiles synced'
+    setTimeout(() => { syncDone.value = false }, 4000)
+  } catch (e) {
+    syncError.value = true
+    syncLabel.value = e.message
+    setTimeout(() => { syncError.value = false }, 5000)
+  } finally {
+    syncing.value = false
+  }
+}
 
 const expanded = ref(false)
 const search = ref('')
