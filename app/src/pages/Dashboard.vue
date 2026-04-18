@@ -74,7 +74,8 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <SummaryCard label="Balance" :value="formatCurrency(balance)" color="green" icon="💰" />
       <SummaryCard label="Total Spent" :value="formatCurrency(stats.spent)" color="pink" icon="💸" />
       <SummaryCard label="Top-ups" :value="formatCurrency(stats.topups)" color="blue" icon="💳" />
       <SummaryCard label="Tips" :value="formatCurrency(stats.tips)" color="yellow" icon="💝" />
@@ -238,6 +239,16 @@ const stats = computed(() => {
     }
   }
   return { spent, topups, tips, subs }
+})
+
+const balance = computed(() => {
+  let topups = 0, spent = 0
+  for (const tx of transactions.value) {
+    const type = getTxType(tx)
+    if (type === 'topup') topups += tx.amount || 0
+    else spent += tx.amount || 0
+  }
+  return topups - spent
 })
 
 // --- Creators ---

@@ -23,6 +23,7 @@ const colorMap = {
   blue: { text: 'text-blue-400', border: 'border-blue-500/20' },
   yellow: { text: 'text-yellow-400', border: 'border-yellow-500/20' },
   purple: { text: 'text-purple-400', border: 'border-purple-500/20' },
+  green: { text: 'text-green-400', border: 'border-green-500/20' },
 }
 
 const textColor = computed(() => colorMap[props.color]?.text || 'text-white')
