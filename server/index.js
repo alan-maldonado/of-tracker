@@ -26,7 +26,7 @@ app.get('/api/backup-profiles', async (req, res) => {
 })
 
 app.get('/api/scraper-script', (_, res) => {
-  const scriptPath = path.resolve(__dirname, '../scrapper/transactions.js')
+  const scriptPath = path.resolve(__dirname, 'scrapper/transactions.js')
   try {
     const script = fs.readFileSync(scriptPath, 'utf8')
     res.type('text/plain').send(script)

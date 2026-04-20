@@ -1,8 +1,8 @@
 services:
   server:
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: server/Dockerfile
     user: "${UID:-999}:${GID:-1000}"
     restart: unless-stopped
     environment:

@@ -5,10 +5,11 @@ WORKDIR /app
 # better-sqlite3 needs Python + build tools for native compilation
 RUN apk add --no-cache python3 make g++
 
-COPY package*.json ./
+COPY server/package*.json ./
 RUN npm install --production
 
-COPY . .
+COPY server/ .
+COPY scrapper/transactions.js ./scrapper/transactions.js
 
 RUN mkdir -p /app/data
 
