@@ -55,6 +55,18 @@
           </svg>
           <span class="text-sm text-white">{{ copied ? 'Copied!' : 'Copy to clipboard' }}</span>
         </button>
+
+        <!-- Copy scraper script -->
+        <button
+          @click="onCopyScript"
+          class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          <span class="text-sm text-white">{{ copiedScript ? 'Copied!' : 'Copy scraper script' }}</span>
+        </button>
       </div>
     </Transition>
   </div>
@@ -157,8 +169,9 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { transactions, importTransactions } from '../composables/useTransactions'
 
-const open     = ref(false)
-const copied   = ref(false)
+const open        = ref(false)
+const copied      = ref(false)
+const copiedScript = ref(false)
 const modal    = ref(false)
 const tab      = ref('file')
 const error    = ref('')
@@ -248,6 +261,22 @@ async function onImport() {
     error.value = err.message || 'Import failed'
   } finally {
     importing.value = false
+  }
+}
+
+async function onCopyScript() {
+  try {
+    const res = await fetch('/api/scraper-script')
+    if (!res.ok) throw new Error('Could not fetch script')
+    const script = await res.text()
+    const data = JSON.stringify(transactions.value)
+    const full = `window.data = ${data}\n\n${script}`
+    await navigator.clipboard.writeText(full)
+    copiedScript.value = true
+    setTimeout(() => { copiedScript.value = false }, 2000)
+    open.value = false
+  } catch (e) {
+    console.error('[CopyScript]', e.message)
   }
 }
 

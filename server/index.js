@@ -1,5 +1,7 @@
 const express = require('express')
 const cors = require('cors')
+const fs = require('fs')
+const path = require('path')
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -20,6 +22,16 @@ app.get('/api/backup-profiles', async (req, res) => {
     res.json(profiles.map(p => p.name))
   } catch (e) {
     res.status(502).json({ error: e.message })
+  }
+})
+
+app.get('/api/scraper-script', (_, res) => {
+  const scriptPath = path.resolve(__dirname, '../scrapper/transactions.js')
+  try {
+    const script = fs.readFileSync(scriptPath, 'utf8')
+    res.type('text/plain').send(script)
+  } catch (e) {
+    res.status(500).json({ error: 'Could not read scraper script' })
   }
 })
 
