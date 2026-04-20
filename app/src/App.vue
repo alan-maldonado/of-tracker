@@ -4,13 +4,13 @@
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex items-center justify-between h-14">
 
-          <!-- Logo + Nav -->
+          <!-- Logo + Desktop Nav -->
           <div class="flex items-center gap-4">
             <RouterLink to="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity shrink-0">
               <img src="/logo.svg" class="w-8 h-8" alt="OF Tracker" />
               <span class="font-semibold text-white text-sm hidden sm:block">Transaction Tracker</span>
             </RouterLink>
-            <nav class="flex items-center gap-1">
+            <nav class="hidden md:flex items-center gap-1">
               <RouterLink
                 v-for="link in links"
                 :key="link.to"
@@ -22,97 +22,119 @@
                     : 'text-gray-400 hover:text-white hover:bg-gray-800'
                 ]"
               >{{ link.label }}</RouterLink>
-
             </nav>
           </div>
 
           <!-- Actions (far right) -->
           <div class="flex items-center gap-1">
-          <!-- Search (far right) -->
-          <div class="relative flex items-center gap-2" ref="searchContainer" @mouseenter="openSearch" @mouseleave="onMouseLeave">
-            <!-- Icon always visible -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0 transition-colors" :class="expanded ? 'text-pink-400' : 'text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="7"/>
-              <line x1="16.5" y1="16.5" x2="22" y2="22"/>
-            </svg>
-
-            <!-- Expanding input -->
-            <div class="search-input-wrap" :class="{ expanded }">
-              <input
-                ref="inputEl"
-                v-model="search"
-                type="text"
-                placeholder="Search creator..."
-                class="search-input text-sm text-gray-100 placeholder-gray-600 focus:outline-none bg-transparent"
-                @keydown.escape="closeSearch"
-                @keydown.enter="goToFirst"
-                @keydown.tab.prevent="goToFirst"
-              />
+            <!-- Search -->
+            <div class="relative flex items-center gap-2" ref="searchContainer" @mouseenter="openSearch" @mouseleave="onMouseLeave" @click="openSearch">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0 transition-colors" :class="expanded ? 'text-pink-400' : 'text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/>
+                <line x1="16.5" y1="16.5" x2="22" y2="22"/>
+              </svg>
+              <div class="search-input-wrap" :class="{ expanded }">
+                <input
+                  ref="inputEl"
+                  v-model="search"
+                  type="text"
+                  placeholder="Search creator..."
+                  class="search-input text-sm text-gray-100 placeholder-gray-600 focus:outline-none bg-transparent"
+                  @keydown.escape="closeSearch"
+                  @keydown.enter="goToFirst"
+                  @keydown.tab.prevent="goToFirst"
+                />
+              </div>
+              <Transition name="fade-x">
+                <button v-if="expanded" @click.stop="closeSearch" class="text-gray-500 hover:text-white transition-colors text-xs shrink-0">✕</button>
+              </Transition>
+              <Transition name="dropdown">
+                <div
+                  v-if="expanded && search"
+                  class="absolute right-0 top-full mt-2 w-72 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-xl"
+                >
+                  <template v-if="searchResults.length">
+                    <RouterLink
+                      v-for="c in searchResults"
+                      :key="c.username"
+                      :to="`/profile/${c.username}`"
+                      @click="closeSearch"
+                      class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-700 transition-colors"
+                    >
+                      <img v-if="c.avatar" :src="c.avatar" class="w-8 h-8 rounded-full object-cover shrink-0" />
+                      <div v-else class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-xs text-gray-400 shrink-0">{{ c.name?.[0] }}</div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm text-white truncate">{{ c.name }}</p>
+                        <p class="text-xs text-gray-500">@{{ c.username }}</p>
+                      </div>
+                      <span class="text-sm text-pink-400 shrink-0">{{ formatCurrency(c.total) }}</span>
+                    </RouterLink>
+                  </template>
+                  <p v-else class="px-4 py-3 text-sm text-gray-500">No results</p>
+                </div>
+              </Transition>
             </div>
 
-            <!-- Close button -->
-            <Transition name="fade-x">
-              <button v-if="expanded" @click="closeSearch" class="text-gray-500 hover:text-white transition-colors text-xs shrink-0">✕</button>
-            </Transition>
+            <!-- Desktop only icons -->
+            <div class="hidden md:flex items-center gap-1">
+              <ImportExport />
+              <a href="http://zima.local:6906" title="OF Backup" class="p-1.5 rounded-lg text-gray-500 hover:text-white transition-colors shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                </svg>
+              </a>
+              <button @click="runSync" :disabled="syncing" :title="syncLabel || 'Sync backup profiles'" class="p-1.5 rounded-lg transition-colors shrink-0" :class="syncing ? 'text-gray-600 cursor-not-allowed' : syncError ? 'text-red-400 hover:text-red-300' : syncDone ? 'text-green-400 hover:text-green-300' : 'text-gray-500 hover:text-white'">
+                <svg v-if="syncing" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+              </button>
+            </div>
 
-            <Transition name="dropdown">
-              <div
-                v-if="expanded && search"
-                class="absolute right-0 top-full mt-2 w-72 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-xl"
-              >
-                <template v-if="searchResults.length">
-                  <RouterLink
-                    v-for="c in searchResults"
-                    :key="c.username"
-                    :to="`/profile/${c.username}`"
-                    @click="closeSearch"
-                    class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-700 transition-colors"
-                  >
-                    <img v-if="c.avatar" :src="c.avatar" class="w-8 h-8 rounded-full object-cover shrink-0" />
-                    <div v-else class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-xs text-gray-400 shrink-0">{{ c.name?.[0] }}</div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm text-white truncate">{{ c.name }}</p>
-                      <p class="text-xs text-gray-500">@{{ c.username }}</p>
-                    </div>
-                    <span class="text-sm text-pink-400 shrink-0">{{ formatCurrency(c.total) }}</span>
-                  </RouterLink>
-                </template>
-                <p v-else class="px-4 py-3 text-sm text-gray-500">No results</p>
-              </div>
-            </Transition>
+            <!-- Mobile hamburger -->
+            <button @click="menuOpen = !menuOpen" class="md:hidden p-1.5 rounded-lg text-gray-400 hover:text-white transition-colors">
+              <svg v-if="!menuOpen" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
           </div>
-          <ImportExport />
-
-          <!-- Backup link -->
-          <a
-            href="http://zima.local:6906"
-            title="OF Backup"
-            class="p-1.5 rounded-lg text-gray-500 hover:text-white transition-colors shrink-0"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-            </svg>
-          </a>
-
-          <!-- Sync backup profiles -->
-          <button
-            @click="runSync"
-            :disabled="syncing"
-            :title="syncLabel || 'Sync backup profiles'"
-            class="p-1.5 rounded-lg transition-colors shrink-0"
-            :class="syncing ? 'text-gray-600 cursor-not-allowed' : syncError ? 'text-red-400 hover:text-red-300' : syncDone ? 'text-green-400 hover:text-green-300' : 'text-gray-500 hover:text-white'"
-          >
-            <svg v-if="syncing" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-            </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-          </button>
-          </div>
-
         </div>
+
+        <!-- Mobile menu -->
+        <Transition name="mobile-menu">
+          <div v-if="menuOpen" class="md:hidden border-t border-gray-800 py-3 space-y-1">
+            <RouterLink
+              v-for="link in links"
+              :key="link.to"
+              :to="link.to"
+              @click="menuOpen = false"
+              :class="[
+                'flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                $route.path === link.to ? 'bg-pink-500/20 text-pink-400' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              ]"
+            >{{ link.label }}</RouterLink>
+
+            <div class="border-t border-gray-800 mt-2 pt-2 space-y-1">
+              <a href="http://zima.local:6906" @click="menuOpen = false" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                OF Backup
+              </a>
+              <button @click="runSync; menuOpen = false" :disabled="syncing" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors" :class="syncError ? 'text-red-400' : syncDone ? 'text-green-400' : 'text-gray-400 hover:text-white hover:bg-gray-800'">
+                <svg v-if="syncing" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                {{ syncDone ? syncLabel : syncError ? syncLabel : 'Sync' }}
+              </button>
+              <div class="px-3 py-1" @click="menuOpen = false">
+                <ImportExport />
+              </div>
+            </div>
+          </div>
+        </Transition>
       </div>
     </header>
 
@@ -136,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { formatCurrency, useTransactions, isLoading, loadError, loadBackupProfiles } from './composables/useTransactions'
 import ImportExport from './components/ImportExport.vue'
@@ -149,6 +171,9 @@ const links = [
 
 const router = useRouter()
 const { allCreators } = useTransactions()
+const menuOpen = ref(false)
+
+watch(() => router.currentRoute.value.path, () => { menuOpen.value = false })
 
 const syncing   = ref(false)
 const syncDone  = ref(false)
@@ -218,7 +243,6 @@ const searchResults = computed(() => {
 </script>
 
 <style scoped>
-/* Search expand animation */
 .search-input-wrap {
   display: flex;
   align-items: center;
@@ -240,15 +264,13 @@ const searchResults = computed(() => {
 .search-input:focus {
   border-color: #ec4899;
 }
-
-/* Existing dropdown transition */
 .dropdown-enter-active { transition: opacity 0.15s ease, transform 0.15s ease; }
 .dropdown-leave-active { transition: opacity 0.1s ease; }
 .dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-4px); }
-
-/* Close button fade */
 .fade-x-enter-active { transition: opacity 0.15s ease, transform 0.15s ease; }
 .fade-x-leave-active { transition: opacity 0.1s ease; }
 .fade-x-enter-from, .fade-x-leave-to { opacity: 0; transform: scale(0.8); }
+.mobile-menu-enter-active { transition: opacity 0.15s ease, transform 0.15s ease; }
+.mobile-menu-leave-active { transition: opacity 0.1s ease, transform 0.1s ease; }
+.mobile-menu-enter-from, .mobile-menu-leave-to { opacity: 0; transform: translateY(-6px); }
 </style>
-
