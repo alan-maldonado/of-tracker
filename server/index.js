@@ -25,6 +25,20 @@ app.get('/api/backup-profiles', async (req, res) => {
   }
 })
 
+app.post('/api/transactions/backup', (req, res) => {
+  const dataDir = process.env.DATA_DIR || path.resolve(__dirname, '../data')
+  try {
+    const rows = require('./db').prepare('SELECT raw FROM transactions ORDER BY created_at DESC').all()
+    const data = rows.map(r => JSON.parse(r.raw))
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const file = path.join(dataDir, `backup_${stamp}.json`)
+    fs.writeFileSync(file, JSON.stringify(data))
+    res.json({ ok: true, file: path.basename(file), count: data.length })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+})
+
 app.get('/api/scraper-script', (_, res) => {
   const scriptPath = path.resolve(__dirname, 'scrapper/transactions.js')
   try {

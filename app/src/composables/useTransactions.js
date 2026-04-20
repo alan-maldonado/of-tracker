@@ -24,7 +24,14 @@ export async function loadTransactions() {
   }
 }
 
+export async function backupTransactions() {
+  const res = await fetch('/api/transactions/backup', { method: 'POST' })
+  if (!res.ok) throw new Error(`Backup failed: HTTP ${res.status}`)
+  return res.json()
+}
+
 export async function importTransactions(data) {
+  await backupTransactions()
   const res = await fetch('/api/transactions/import', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
