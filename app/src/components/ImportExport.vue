@@ -264,14 +264,27 @@ async function onImport() {
   }
 }
 
+async function writeToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+  } else {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.style.cssText = 'position:fixed;opacity:0'
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+  }
+}
+
 async function onCopyScript() {
   try {
     const res = await fetch('/api/scraper-script')
     if (!res.ok) throw new Error('Could not fetch script')
     const script = await res.text()
-    const data = JSON.stringify(transactions.value)
-    const full = `window.data = ${data}\n\n${script}`
-    await navigator.clipboard.writeText(full)
+    const full = `window.data = ${JSON.stringify(transactions.value)}\n\n${script}`
+    await writeToClipboard(full)
     copiedScript.value = true
     setTimeout(() => { copiedScript.value = false }, 2000)
     open.value = false
@@ -282,21 +295,12 @@ async function onCopyScript() {
 
 async function onCopy() {
   try {
-    await navigator.clipboard.writeText(JSON.stringify(transactions.value))
+    await writeToClipboard(JSON.stringify(transactions.value))
     copied.value = true
     setTimeout(() => { copied.value = false }, 2000)
     open.value = false
-  } catch {
-    // fallback: select a temp textarea
-    const ta = document.createElement('textarea')
-    ta.value = JSON.stringify(transactions.value)
-    document.body.appendChild(ta)
-    ta.select()
-    document.execCommand('copy')
-    document.body.removeChild(ta)
-    copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
-    open.value = false
+  } catch (e) {
+    console.error('[Copy]', e.message)
   }
 }
 
