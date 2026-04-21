@@ -186,7 +186,7 @@ const canImport = computed(() => tab.value === 'file' ? !!fileData.value : paste
 
 function openModal() {
   open.value = false
-  tab.value = 'file'
+  tab.value = 'paste'
   error.value = ''
   pasteText.value = ''
   fileName.value = ''
