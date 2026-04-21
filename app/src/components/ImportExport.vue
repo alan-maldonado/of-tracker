@@ -93,7 +93,7 @@
           <!-- Tabs -->
           <div class="flex border-b border-gray-700">
             <button
-              v-for="t in ['file', 'paste']"
+              v-for="t in ['paste', 'file']"
               :key="t"
               @click="tab = t"
               :class="[
@@ -173,7 +173,7 @@ const open        = ref(false)
 const copied      = ref(false)
 const copiedScript = ref(false)
 const modal    = ref(false)
-const tab      = ref('file')
+const tab      = ref('paste')
 const error    = ref('')
 const importing = ref(false)
 const pasteText = ref('')
@@ -256,10 +256,10 @@ async function onImport() {
   try {
     const { inserted } = await importTransactions(data)
     console.log(`[Import] ${inserted} transactions saved`)
+    importing.value = false
     closeModal()
   } catch (err) {
     error.value = err.message || 'Import failed'
-  } finally {
     importing.value = false
   }
 }
