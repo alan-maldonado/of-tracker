@@ -35,6 +35,12 @@
   }
   // Rebuild seen set from existing data so re-pasting the script doesn't duplicate
   const seen = new Set(window.__transactions.map(tx => tx.id).filter(Boolean))
+  // Also register dom_msg_<firstId> aliases for API transactions so the DOM
+  // scraper won't add a duplicate when the same transaction already came via API
+  for (const tx of window.__transactions) {
+    const m = (tx.description || '').match(/firstId=(\d+)/)
+    if (m) seen.add(`dom_msg_${m[1]}`)
+  }
 
   let _hasMore = null
   let _nextMarker = null
